@@ -719,3 +719,45 @@ mark {
     font-size: 0.8rem;
   }
 }
+
+/* Settings added in M6 */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.2rem 0.15rem 0.7rem;
+  border: 2px solid var(--black);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.chip-remove {
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--black);
+  cursor: pointer;
+}
+
+.chip-remove:hover {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* the file input is hidden, so show its focus on the label that looks like a button */
+.form-actions:has(#import-file:focus-visible) label[for="import-file"] {
+  outline: 3px solid var(--black);
+  outline-offset: 3px;
+}
+
+#data-status:not(:empty) {
+  border-left: 4px solid var(--black);
+  padding-left: 0.5rem;
+}

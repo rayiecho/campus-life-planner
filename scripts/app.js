@@ -1,13 +1,18 @@
-import { checkField, checkTask, checkCap, collapseSpaces } from './validators.js';
+import { checkField, checkTask, checkCap, checkTag, collapseSpaces } from './validators.js';
 import {
   showError, clearErrors, setStatus, renderTasks, setSortIndicator, focusInTask,
-  renderStats, renderChart, renderCap
+  renderStats, renderChart, renderCap, renderTagChips, downloadFile
 } from './ui.js';
 import {
-  getTasks, setTasks, addTask, updateTask, deleteTask, findTask, getSettings, updateSettings
+  getTasks, setTasks, addTask, updateTask, deleteTask, findTask,
+  getSettings, updateSettings, resetSettings, getCounter, setCounter
 } from './state.js';
+import {
+  loadTasks, saveTasks, loadSettings, saveSettings, loadCounter, saveCounter,
+  buildExport, parseImport, validateTasks
+} from './storage.js';
 import { compileRegex, parseQuery, filterTasks, sortTasks } from './search.js';
-import { computeStats, capStatus } from './stats.js';
+import { computeStats, capStatus, localDateString } from './stats.js';
 
 const form = document.getElementById('task-form');
 const tasksSection = document.getElementById('tasks');
@@ -53,9 +58,20 @@ function updateDashboard() {
   renderCap(capStatus(stats.next7, weeklyCap), stats.next7, weeklyCap, unit);
 }
 
+// Every change to the tasks is saved straight away
+function persist() {
+  const ok = saveTasks(getTasks()) && saveCounter(getCounter());
+  if (!ok) setStatus('data-status', "Couldn't save to this browser. Your changes will be lost when you close the page.");
+}
+
 function afterChange() {
   refresh();
   updateDashboard();
+  persist();
+}
+
+function saveAllSettings() {
+  if (!saveSettings(getSettings())) setStatus('data-status', "Couldn't save your settings in this browser.");
 }
 
 function runSearch() {
@@ -235,13 +251,31 @@ tasksSection.addEventListener('keydown', e => {
   if (e.key === 'Escape' && editingId) cancelEdit();
 });
 
-// Settings: weekly target (the rest of Settings is added in M6)
+// Settings
 
 const settingsForm = document.getElementById('settings-form');
 const capInput = document.getElementById('weekly-cap');
+const newTagInput = document.getElementById('new-tag');
 
 // pressing Enter in a settings field would otherwise reload the page
 settingsForm.addEventListener('submit', e => e.preventDefault());
+
+function showSettings() {
+  const { unit, weeklyCap, tags } = getSettings();
+  document.getElementById(unit === 'hours' ? 'unit-hr' : 'unit-min').checked = true;
+  capInput.value = weeklyCap || '';
+  renderTagChips(tags);
+}
+
+// Minutes or hours. Tasks are always saved in minutes, this only changes how they're shown.
+settingsForm.addEventListener('change', e => {
+  if (e.target.name !== 'unit') return;
+  updateSettings({ unit: e.target.value });
+  saveAllSettings();
+  refresh();
+  updateDashboard();
+  setStatus('data-status', `Showing time in ${e.target.value}.`);
+});
 
 capInput.addEventListener('change', () => {
   const value = capInput.value.trim();
@@ -249,6 +283,7 @@ capInput.addEventListener('change', () => {
   showError(capInput, msg);
   if (msg) return;
   updateSettings({ weeklyCap: value === '' ? 0 : Number(value) });
+  saveAllSettings();
   updateDashboard();
 });
 
@@ -256,31 +291,132 @@ capInput.addEventListener('input', () => {
   if (capInput.hasAttribute('aria-invalid')) showError(capInput, checkCap(capInput.value.trim()));
 });
 
-// Start up
+function addTag() {
+  const tag = collapseSpaces(newTagInput.value.trim());
+  const tags = getSettings().tags;
+  let msg = checkTag(tag);
+  if (!msg && tags.some(t => t.toLowerCase() === tag.toLowerCase())) msg = `"${tag}" is already a tag.`;
+  showError(newTagInput, msg);
+  if (msg) {
+    newTagInput.focus();
+    return;
+  }
 
-function fillTagList(tags) {
-  const list = document.getElementById('tag-list');
-  list.replaceChildren(...tags.map(tag => {
-    const option = document.createElement('option');
-    option.value = tag;
-    return option;
-  }));
+  updateSettings({ tags: [...tags, tag] });
+  saveAllSettings();
+  renderTagChips(getSettings().tags);
+  newTagInput.value = '';
+  setStatus('data-status', `Added tag "${tag}".`);
 }
 
-// For now the sample tasks load every time the page opens.
-// M6 replaces this with localStorage.
+document.getElementById('add-tag-btn').addEventListener('click', addTag);
+newTagInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addTag();
+  }
+});
+newTagInput.addEventListener('input', () => {
+  if (newTagInput.hasAttribute('aria-invalid')) showError(newTagInput, '');
+});
+
+// Removing a tag doesn't touch existing tasks, it just stops suggesting it
+document.getElementById('tag-chips').addEventListener('click', e => {
+  const btn = e.target.closest('.chip-remove');
+  if (!btn) return;
+  const tag = btn.dataset.tag;
+  const tags = getSettings().tags;
+  if (tags.length === 1) {
+    setStatus('data-status', 'You need to keep at least one tag.');
+    return;
+  }
+
+  const index = tags.indexOf(tag);
+  updateSettings({ tags: tags.filter(t => t !== tag) });
+  saveAllSettings();
+  renderTagChips(getSettings().tags);
+  setStatus('data-status', `Removed tag "${tag}".`);
+
+  // move focus to a nearby chip so keyboard users don't get sent back to the top
+  const buttons = document.querySelectorAll('#tag-chips .chip-remove');
+  (buttons[Math.min(index, buttons.length - 1)] || newTagInput).focus();
+});
+
+// Import, export and clear
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const name = `campus-planner-${localDateString()}.json`;
+  downloadFile(name, buildExport(getTasks(), getSettings()));
+  setStatus('data-status', `Exported ${getTasks().length} tasks to ${name}.`);
+});
+
+const importInput = document.getElementById('import-file');
+
+importInput.addEventListener('change', async () => {
+  const file = importInput.files[0];
+  importInput.value = ''; // so picking the same file again still triggers change
+  if (!file) return;
+
+  let text;
+  try {
+    text = await file.text();
+  } catch {
+    setStatus('data-status', "Couldn't read that file.");
+    return;
+  }
+
+  const result = parseImport(text);
+  if (!result.ok) {
+    const shown = result.problems.slice(0, 3).join(' ');
+    const more = result.problems.length > 3 ? ` (and ${result.problems.length - 3} more problems)` : '';
+    setStatus('data-status', `Import cancelled. ${shown}${more}`);
+    return;
+  }
+
+  if (!confirm(`Replace your ${getTasks().length} tasks with ${result.tasks.length} tasks from "${file.name}"?`)) {
+    setStatus('data-status', 'Import cancelled.');
+    return;
+  }
+
+  editingId = null;
+  setTasks(result.tasks);
+  setCounter(getCounter());
+  if (result.settings) {
+    updateSettings(result.settings);
+    saveAllSettings();
+    showSettings();
+  }
+  afterChange();
+  setStatus('data-status', `Imported ${result.tasks.length} tasks from "${file.name}".`);
+});
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (!confirm('Delete all tasks and reset settings? Export first if you want a backup.')) return;
+  editingId = null;
+  setTasks([]);
+  resetSettings();
+  saveAllSettings();
+  showSettings();
+  afterChange();
+  setStatus('data-status', 'All data cleared.');
+});
+
+// Start up
+
+// Only used the very first time, when nothing has been saved yet
 async function loadSeed() {
   try {
     const res = await fetch('seed.json');
     if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    if (Array.isArray(data)) setTasks(data);
+    return validateTasks(await res.json()).valid;
   } catch {
-    // no seed file, start with an empty list
+    return [];
   }
 }
 
-fillTagList(getSettings().tags);
-capInput.value = getSettings().weeklyCap || '';
-await loadSeed();
+updateSettings(loadSettings());
+const saved = loadTasks();
+setTasks(saved === null ? await loadSeed() : saved);
+setCounter(loadCounter());
+showSettings();
 afterChange();

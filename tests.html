@@ -25,6 +25,8 @@
     import { patterns, collapseSpaces, checkTitle, checkDuration, checkDate, checkTag, checkTask } from './scripts/validators.js';
     import { compileRegex, parseQuery, sortTasks } from './scripts/search.js';
     import { computeStats, capStatus, addDays } from './scripts/stats.js';
+    import { parseImport, validateSettings, checkRecord } from './scripts/storage.js';
+    import { formatDuration } from './scripts/ui.js';
 
     const results = document.getElementById('results');
     let passed = 0;
@@ -118,6 +120,23 @@
     assert('100 used of 120 target is under by 20', capStatus(100, 120).over === false && capStatus(100, 120).amount === 20);
     assert('150 used of 120 target is over by 30', capStatus(150, 120).over === true && capStatus(150, 120).amount === 30);
     assert('no target returns null', capStatus(50, 0) === null);
+
+    group('Import and settings');
+    const rec = { id: 'task_0001', title: 'Lab', dueDate: '2026-10-14', duration: 90, tag: 'Exam',
+                  createdAt: '2026-10-01T08:15:00.000Z', updatedAt: '2026-10-01T08:15:00.000Z' };
+    assert('a good record passes', checkRecord(rec) === '');
+    assert('duration as text "90" is rejected', checkRecord({ ...rec, duration: '90' }) !== '');
+    assert('bad id "abc" is rejected', checkRecord({ ...rec, id: 'abc' }) !== '');
+    assert('missing createdAt is rejected', checkRecord({ ...rec, createdAt: undefined }) !== '');
+    assert('plain list imports', parseImport(JSON.stringify([rec])).ok);
+    assert('export format imports', parseImport(JSON.stringify({ tasks: [rec], settings: { unit: 'hours' } })).settings.unit === 'hours');
+    assert('broken JSON is rejected', !parseImport('{"tasks": [').ok);
+    assert('duplicate ids are rejected', !parseImport(JSON.stringify([rec, rec])).ok);
+    assert('one bad record rejects the whole file', !parseImport(JSON.stringify([rec, { ...rec, id: 'task_0002', dueDate: '2026-02-30' }])).ok);
+    assert('object without tasks is rejected', !parseImport('{"hello": 1}').ok);
+    assert('bad settings fall back to defaults', validateSettings({ unit: 'days', weeklyCap: -5 }).unit === 'minutes');
+    assert('90 minutes shows as 1.5 h', formatDuration(90, 'hours') === '1.5 h');
+    assert('45.5 minutes shows as 45.5 min', formatDuration(45.5, 'minutes') === '45.5 min');
 
     document.getElementById('summary').textContent =
       `${passed} passed, ${failed} failed`;

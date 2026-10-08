@@ -1,14 +1,16 @@
-// Keeps the list of tasks in memory. Saving to localStorage is added in M6.
+// Keeps the tasks and settings in memory. storage.js saves them to localStorage.
 
 export const DEFAULT_TAGS = ['Assignment', 'Class', 'Exam', 'Club', 'Personal', 'Other'];
 
-let tasks = [];
-let counter = 0;
-let settings = {
+export const DEFAULT_SETTINGS = {
   unit: 'minutes',
   weeklyCap: 1200,
-  tags: [...DEFAULT_TAGS]
+  tags: DEFAULT_TAGS
 };
+
+let tasks = [];
+let counter = 0;
+let settings = { ...DEFAULT_SETTINGS, tags: [...DEFAULT_TAGS] };
 
 export function getSettings() {
   return settings;
@@ -17,6 +19,10 @@ export function getSettings() {
 export function updateSettings(changes) {
   settings = { ...settings, ...changes };
   return settings;
+}
+
+export function resetSettings() {
+  settings = { ...DEFAULT_SETTINGS, tags: [...DEFAULT_TAGS] };
 }
 
 function idNumber(id) {
@@ -32,6 +38,15 @@ export function getTasks() {
 export function setTasks(list) {
   tasks = list;
   counter = Math.max(counter, 0, ...list.map(t => idNumber(t.id)));
+}
+
+// The counter is saved too, so an id is never reused even after its task is deleted
+export function getCounter() {
+  return counter;
+}
+
+export function setCounter(n) {
+  counter = Math.max(Number(n) || 0, 0, ...tasks.map(t => idNumber(t.id)));
 }
 
 export function findTask(id) {

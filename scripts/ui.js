@@ -278,3 +278,40 @@ export function renderCap(status, used, cap, unit) {
     setStatus('cap-status', message);
   }
 }
+
+// Settings
+
+export function renderTagChips(tags) {
+  const list = document.getElementById('tag-chips');
+  list.replaceChildren(...tags.map(tag => {
+    const li = el('li', 'chip');
+    const name = el('span');
+    name.textContent = tag;
+    const remove = el('button', 'chip-remove');
+    remove.type = 'button';
+    remove.dataset.tag = tag;
+    remove.setAttribute('aria-label', `Remove tag ${tag}`);
+    remove.textContent = '×';
+    li.append(name, remove);
+    return li;
+  }));
+
+  const datalist = document.getElementById('tag-list');
+  datalist.replaceChildren(...tags.map(tag => {
+    const option = el('option');
+    option.value = tag;
+    return option;
+  }));
+}
+
+// Turns text into a file the browser downloads
+export function downloadFile(name, text, type = 'application/json') {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = el('a');
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
