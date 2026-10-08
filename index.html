@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Life Planner</title>
+  <meta name="description" content="Plan tasks and events, track time, and search with regex.">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo">Campus Planner</h1>
+      <nav aria-label="Main">
+        <ul class="nav-list">
+          <li><a href="#dashboard">Dashboard</a></li>
+          <li><a href="#tasks">Tasks</a></li>
+          <li><a href="#form">Add task</a></li>
+          <li><a href="#settings">Settings</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="container" tabindex="-1">
+
+    <section id="dashboard" aria-labelledby="dashboard-title">
+      <h2 id="dashboard-title">Dashboard</h2>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value" id="stat-count">0</span>
+          <span class="stat-label">Tasks</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="stat-total">0 min</span>
+          <span class="stat-label">Total time</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="stat-top-tag">None</span>
+          <span class="stat-label">Top tag</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="stat-week">0 min</span>
+          <span class="stat-label">Due in next 7 days</span>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <h3>Last 7 days</h3>
+        <div class="chart" id="chart" role="img" aria-label="Chart of task time for the last 7 days"></div>
+      </div>
+
+      <p class="cap-status" id="cap-status" role="status" aria-live="polite">No weekly target set.</p>
+    </section>
+
+    <section id="tasks" aria-labelledby="tasks-title">
+      <h2 id="tasks-title">Tasks</h2>
+
+      <div class="toolbar">
+        <div class="field">
+          <label for="search">Search (regex)</label>
+          <input type="text" id="search" placeholder="e.g. @tag:Exam" autocomplete="off" aria-describedby="search-help">
+          <small id="search-help">Type a pattern. Invalid patterns are ignored.</small>
+        </div>
+
+        <div class="field field-inline">
+          <input type="checkbox" id="case-toggle" checked>
+          <label for="case-toggle">Ignore case</label>
+        </div>
+
+        <div class="field">
+          <label for="sort">Sort by</label>
+          <select id="sort">
+            <option value="date-asc">Due date (soonest)</option>
+            <option value="date-desc">Due date (latest)</option>
+            <option value="title-asc">Title (A to Z)</option>
+            <option value="title-desc">Title (Z to A)</option>
+            <option value="duration-asc">Duration (shortest)</option>
+            <option value="duration-desc">Duration (longest)</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
+
+      <div class="table-wrap">
+        <table class="task-table">
+          <caption class="visually-hidden">All tasks</caption>
+          <thead>
+            <tr>
+              <th scope="col">Title</th>
+              <th scope="col">Due date</th>
+              <th scope="col">Duration</th>
+              <th scope="col">Tag</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="task-rows"></tbody>
+        </table>
+      </div>
+
+      <ul class="task-cards" id="task-cards"></ul>
+
+      <p class="empty-state" id="empty-state">No tasks yet. Add your first one below.</p>
+    </section>
+
+    <section id="form" aria-labelledby="form-title">
+      <h2 id="form-title">Add task</h2>
+
+      <form id="task-form" novalidate>
+        <input type="hidden" id="task-id">
+
+        <div class="field">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" required aria-describedby="title-error">
+          <p class="error" id="title-error"></p>
+        </div>
+
+        <div class="field">
+          <label for="due-date">Due date</label>
+          <input type="date" id="due-date" name="dueDate" required aria-describedby="due-date-error">
+          <p class="error" id="due-date-error"></p>
+        </div>
+
+        <div class="field">
+          <label for="duration">Duration (minutes)</label>
+          <input type="text" id="duration" name="duration" inputmode="decimal" required aria-describedby="duration-error">
+          <p class="error" id="duration-error"></p>
+        </div>
+
+        <div class="field">
+          <label for="tag">Tag</label>
+          <input type="text" id="tag" name="tag" list="tag-list" required aria-describedby="tag-error">
+          <datalist id="tag-list"></datalist>
+          <p class="error" id="tag-error"></p>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="save-btn">Save task</button>
+          <button type="reset" class="btn" id="cancel-btn">Cancel</button>
+        </div>
+
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="settings" aria-labelledby="settings-title">
+      <h2 id="settings-title">Settings</h2>
+
+      <form id="settings-form" class="settings-grid" novalidate>
+        <fieldset>
+          <legend>Show time in</legend>
+          <div class="field field-inline">
+            <input type="radio" id="unit-min" name="unit" value="minutes" checked>
+            <label for="unit-min">Minutes</label>
+          </div>
+          <div class="field field-inline">
+            <input type="radio" id="unit-hr" name="unit" value="hours">
+            <label for="unit-hr">Hours</label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="weekly-cap">Weekly target (minutes)</label>
+          <input type="text" id="weekly-cap" inputmode="decimal" aria-describedby="weekly-cap-error">
+          <p class="error" id="weekly-cap-error"></p>
+        </div>
+
+        <div class="field">
+          <label for="new-tag">Add a tag</label>
+          <div class="input-row">
+            <input type="text" id="new-tag" aria-describedby="new-tag-error">
+            <button type="button" class="btn" id="add-tag-btn">Add</button>
+          </div>
+          <p class="error" id="new-tag-error"></p>
+          <ul class="tag-chips" id="tag-chips" aria-label="Your tags"></ul>
+        </div>
+      </form>
+
+      <div class="data-tools">
+        <h3>Your data</h3>
+        <div class="form-actions">
+          <button type="button" class="btn" id="export-btn">Export JSON</button>
+          <label for="import-file" class="btn">Import JSON</label>
+          <input type="file" id="import-file" accept="application/json,.json" class="visually-hidden">
+          <button type="button" class="btn btn-danger" id="clear-btn">Clear all data</button>
+        </div>
+        <p class="form-status" id="data-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section id="about" aria-labelledby="about-title">
+      <h2 id="about-title">About</h2>
+      <p>Campus Planner helps students keep track of assignments, classes and events, see how much time each week needs, and find tasks fast with regex search.</p>
+      <ul class="contact">
+        <li>GitHub: <a href="https://github.com/rayiecho">github.com/rayiecho</a></li>
+        <li>Email: <a href="mailto:YOUR-EMAIL">r.ayiecho@alustudent.com</a></li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Campus Planner. Built with HTML, CSS and JavaScript.</p>
+    </div>
+  </footer>
+</body>
+</html>
