@@ -584,3 +584,65 @@ mark {
     background: var(--grey-faint);
   }
 }
+
+/* Task list details added in M4 */
+
+.table-wrap[hidden],
+.task-cards[hidden] {
+  display: none;
+}
+
+/* only animate a task when it's first added, not every time the list redraws */
+.task-card,
+.task-table tbody tr {
+  animation: none;
+}
+
+.task-card.is-new,
+.task-table tbody tr.is-new {
+  animation: fade-up 0.3s ease-out;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.task-card.editing {
+  border-width: 3px;
+}
+
+.edit-form .field {
+  margin-bottom: 0.6rem;
+}
+
+.task-table th[aria-sort="ascending"]::after {
+  content: " \2191";
+}
+
+.task-table th[aria-sort="descending"]::after {
+  content: " \2193";
+}
+
+@media (min-width: 1024px) {
+  .task-table tr.editing td {
+    background: var(--grey-faint);
+    padding: 1rem;
+  }
+
+  .edit-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1rem;
+    align-items: flex-start;
+  }
+
+  .edit-form .field {
+    flex: 1 1 140px;
+  }
+
+  .edit-form .form-actions {
+    flex: 1 1 100%;
+  }
+}

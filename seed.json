@@ -1,0 +1,110 @@
+[
+  {
+    "id": "task_0001",
+    "title": "CS lab report",
+    "dueDate": "2026-10-14",
+    "duration": 90,
+    "tag": "Assignment",
+    "createdAt": "2026-10-01T08:15:00.000Z",
+    "updatedAt": "2026-10-01T08:15:00.000Z"
+  },
+  {
+    "id": "task_0002",
+    "title": "Group meeting 14:30 in library",
+    "dueDate": "2026-10-09",
+    "duration": 60,
+    "tag": "Club",
+    "createdAt": "2026-10-02T10:00:00.000Z",
+    "updatedAt": "2026-10-03T09:20:00.000Z"
+  },
+  {
+    "id": "task_0003",
+    "title": "Calculus midterm",
+    "dueDate": "2026-10-16",
+    "duration": 120,
+    "tag": "Exam",
+    "createdAt": "2026-09-28T12:00:00.000Z",
+    "updatedAt": "2026-09-28T12:00:00.000Z"
+  },
+  {
+    "id": "task_0004",
+    "title": "Read \"Things Fall Apart\" ch. 1-3",
+    "dueDate": "2026-10-07",
+    "duration": 45.5,
+    "tag": "Class",
+    "createdAt": "2026-10-01T18:40:00.000Z",
+    "updatedAt": "2026-10-05T07:10:00.000Z"
+  },
+  {
+    "id": "task_0005",
+    "title": "C++ lab (pointers & arrays)",
+    "dueDate": "2026-10-06",
+    "duration": 180,
+    "tag": "Assignment",
+    "createdAt": "2026-09-30T14:00:00.000Z",
+    "updatedAt": "2026-09-30T14:00:00.000Z"
+  },
+  {
+    "id": "task_0006",
+    "title": "<b>not bold</b> HTML test",
+    "dueDate": "2026-10-05",
+    "duration": 0.5,
+    "tag": "Other",
+    "createdAt": "2026-10-04T16:00:00.000Z",
+    "updatedAt": "2026-10-04T16:00:00.000Z"
+  },
+  {
+    "id": "task_0007",
+    "title": "Résumé review at careers office",
+    "dueDate": "2026-10-10",
+    "duration": 30,
+    "tag": "Personal",
+    "createdAt": "2026-10-03T11:30:00.000Z",
+    "updatedAt": "2026-10-03T11:30:00.000Z"
+  },
+  {
+    "id": "task_0008",
+    "title": "Hackathon weekend",
+    "dueDate": "2026-10-11",
+    "duration": 1440,
+    "tag": "Club",
+    "createdAt": "2026-09-25T09:00:00.000Z",
+    "updatedAt": "2026-10-06T20:45:00.000Z"
+  },
+  {
+    "id": "task_0009",
+    "title": "Leap day study plan",
+    "dueDate": "2028-02-29",
+    "duration": 25,
+    "tag": "Personal",
+    "createdAt": "2026-10-06T13:00:00.000Z",
+    "updatedAt": "2026-10-06T13:00:00.000Z"
+  },
+  {
+    "id": "task_0010",
+    "title": "Year end reflection",
+    "dueDate": "2026-12-31",
+    "duration": 15.75,
+    "tag": "Personal",
+    "createdAt": "2026-10-06T13:05:00.000Z",
+    "updatedAt": "2026-10-06T13:05:00.000Z"
+  },
+  {
+    "id": "task_0011",
+    "title": "Stats quiz 08:00",
+    "dueDate": "2026-10-02",
+    "duration": 20,
+    "tag": "Exam",
+    "createdAt": "2026-09-27T08:00:00.000Z",
+    "updatedAt": "2026-09-27T08:00:00.000Z"
+  },
+  {
+    "id": "task_0012",
+    "title": "Gym before class",
+    "dueDate": "2026-10-08",
+    "duration": 45,
+    "tag": "Personal",
+    "createdAt": "2026-10-07T05:30:00.000Z",
+    "updatedAt": "2026-10-07T05:30:00.000Z"
+  }
+]
