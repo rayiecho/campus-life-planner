@@ -401,6 +401,22 @@ document.getElementById('clear-btn').addEventListener('click', () => {
   setStatus('data-status', 'All data cleared.');
 });
 
+// Keyboard shortcuts: "/" jumps to search, "n" jumps to the add form.
+// Ignored while typing in a field so they never get in the way.
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const typing = e.target.closest('input, select, textarea, [contenteditable]');
+  if (typing) return;
+
+  if (e.key === '/') {
+    e.preventDefault();
+    searchInput.focus();
+  } else if (e.key === 'n') {
+    e.preventDefault();
+    document.getElementById('title').focus();
+  }
+});
+
 // Start up
 
 // Only used the very first time, when nothing has been saved yet
