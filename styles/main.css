@@ -545,8 +545,6 @@ mark {
 
   #form {
     flex: 0 0 340px;
-    position: sticky;
-    top: 5rem;
     border: 2px solid var(--black);
     border-radius: var(--radius);
     padding: 1.25rem;

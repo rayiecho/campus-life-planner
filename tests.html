@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tests - Campus Planner</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #000; background: #fff; }
+    h1 { border-bottom: 2px solid #000; padding-bottom: 0.4rem; }
+    h2 { font-size: 1.1rem; margin-top: 1.5rem; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 0.3rem 0.5rem; border-bottom: 1px solid #ddd; font-family: ui-monospace, Consolas, monospace; font-size: 0.9rem; }
+    .fail { background: #000; color: #fff; font-weight: bold; }
+    #summary { font-weight: bold; font-size: 1.1rem; padding: 0.75rem; border: 2px solid #000; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Validator tests</h1>
+    <p id="summary" role="status">Running...</p>
+    <div id="results"></div>
+  </main>
+
+  <script type="module">
+    import { patterns, collapseSpaces, checkTitle, checkDuration, checkDate, checkTag, checkTask } from './scripts/validators.js';
+
+    const results = document.getElementById('results');
+    let passed = 0;
+    let failed = 0;
+    let list;
+
+    function group(name) {
+      const h = document.createElement('h2');
+      h.textContent = name;
+      list = document.createElement('ul');
+      results.append(h, list);
+    }
+
+    function assert(label, condition) {
+      const li = document.createElement('li');
+      li.textContent = (condition ? 'PASS  ' : 'FAIL  ') + label;
+      if (!condition) li.className = 'fail';
+      list.append(li);
+      condition ? passed++ : failed++;
+    }
+
+    const ok = msg => msg === '';
+
+    group('Title');
+    assert('"CS lab report" is valid', ok(checkTitle('CS lab report')));
+    assert('" leading space" is rejected', !ok(checkTitle(' leading space')));
+    assert('"trailing space " is rejected', !ok(checkTitle('trailing space ')));
+    assert('empty title is rejected', !ok(checkTitle('')));
+    assert('single character "A" is valid', ok(checkTitle('A')));
+    assert('collapseSpaces turns "a   b" into "a b"', collapseSpaces('a   b') === 'a b');
+
+    group('Duplicate words (back-reference)');
+    assert('"Read the the notes" is caught', !ok(checkTitle('Read the the notes')));
+    assert('"Study Study group" is caught (ignores case)', patterns.duplicateWord.test('Study study group'));
+    assert('"the theory" is not caught', ok(checkTitle('Read the theory')));
+    assert('"Meeting 14:30" is not caught', ok(checkTitle('Meeting 14:30')));
+
+    group('Duration');
+    assert('"90" is valid', ok(checkDuration('90')));
+    assert('"45.5" is valid', ok(checkDuration('45.5')));
+    assert('"30.25" is valid', ok(checkDuration('30.25')));
+    assert('"0.5" is valid', ok(checkDuration('0.5')));
+    assert('"012" is rejected (leading zero)', !ok(checkDuration('012')));
+    assert('"10.555" is rejected (3 decimals)', !ok(checkDuration('10.555')));
+    assert('"-5" is rejected', !ok(checkDuration('-5')));
+    assert('"abc" is rejected', !ok(checkDuration('abc')));
+    assert('"0" is rejected (must be more than 0)', !ok(checkDuration('0')));
+
+    group('Due date');
+    assert('"2026-10-14" is valid', ok(checkDate('2026-10-14')));
+    assert('"2028-02-29" is valid (leap year)', ok(checkDate('2028-02-29')));
+    assert('"2026-02-29" is rejected (not a leap year)', !ok(checkDate('2026-02-29')));
+    assert('"2026-13-01" is rejected (month 13)', !ok(checkDate('2026-13-01')));
+    assert('"2026-04-31" is rejected (April has 30 days)', !ok(checkDate('2026-04-31')));
+    assert('"14/10/2026" is rejected (wrong format)', !ok(checkDate('14/10/2026')));
+
+    group('Tag');
+    assert('"Assignment" is valid', ok(checkTag('Assignment')));
+    assert('"Group Project" is valid', ok(checkTag('Group Project')));
+    assert('"Part-time" is valid', ok(checkTag('Part-time')));
+    assert('"CS101" is rejected (numbers)', !ok(checkTag('CS101')));
+    assert('"Two  spaces" is rejected', !ok(checkTag('Two  spaces')));
+    assert('"-Club" is rejected (starts with hyphen)', !ok(checkTag('-Club')));
+
+    group('Whole task');
+    const good = { title: 'Physics exam', dueDate: '2026-10-20', duration: '120', tag: 'Exam' };
+    const bad = { title: ' x', dueDate: '2026-02-30', duration: '01', tag: 'Exam1' };
+    assert('valid task has no errors', Object.keys(checkTask(good)).length === 0);
+    assert('bad task has 4 errors', Object.keys(checkTask(bad)).length === 4);
+
+    document.getElementById('summary').textContent =
+      `${passed} passed, ${failed} failed`;
+  </script>
+</body>
+</html>
