@@ -23,6 +23,8 @@
 
   <script type="module">
     import { patterns, collapseSpaces, checkTitle, checkDuration, checkDate, checkTag, checkTask } from './scripts/validators.js';
+    import { compileRegex, parseQuery, sortTasks } from './scripts/search.js';
+    import { computeStats, capStatus, addDays } from './scripts/stats.js';
 
     const results = document.getElementById('results');
     let passed = 0;
@@ -92,6 +94,30 @@
     const bad = { title: ' x', dueDate: '2026-02-30', duration: '01', tag: 'Exam1' };
     assert('valid task has no errors', Object.keys(checkTask(good)).length === 0);
     assert('bad task has 4 errors', Object.keys(checkTask(bad)).length === 4);
+
+    group('Search');
+    assert('invalid pattern "(abc" returns no regex and an error', compileRegex('(abc').re === null && compileRegex('(abc').error !== '');
+    assert('empty search returns no regex', compileRegex('').re === null);
+    assert('"@tag:Exam quiz" splits into tag and pattern', parseQuery('@tag:Exam quiz').tag === 'Exam' && parseQuery('@tag:Exam quiz').pattern === 'quiz');
+    const sample = [
+      { title: 'b', dueDate: '2026-10-09', duration: 30, tag: 'Exam' },
+      { title: 'A', dueDate: '2026-10-02', duration: 120, tag: 'Club' },
+      { title: 'c', dueDate: '2026-10-08', duration: 15.5, tag: 'Exam' }
+    ];
+    assert('sort by title ignores case (A, b, c)', sortTasks(sample, 'title-asc').map(t => t.title).join('') === 'Abc');
+    assert('sort by duration longest first', sortTasks(sample, 'duration-desc')[0].duration === 120);
+
+    group('Stats');
+    const stats = computeStats(sample, '2026-10-08');
+    assert('count is 3', stats.count === 3);
+    assert('total is 165.5', stats.total === 165.5);
+    assert('top tag is Exam', stats.top.tag === 'Exam' && stats.top.count === 2);
+    assert('next 7 days counts today and tomorrow (45.5)', stats.next7 === 45.5);
+    assert('chart has 7 days ending today', stats.days.length === 7 && stats.days[6].date === '2026-10-08');
+    assert('addDays crosses month end', addDays('2026-10-31', 1) === '2026-11-01');
+    assert('100 used of 120 target is under by 20', capStatus(100, 120).over === false && capStatus(100, 120).amount === 20);
+    assert('150 used of 120 target is over by 30', capStatus(150, 120).over === true && capStatus(150, 120).amount === 30);
+    assert('no target returns null', capStatus(50, 0) === null);
 
     document.getElementById('summary').textContent =
       `${passed} passed, ${failed} failed`;

@@ -646,3 +646,76 @@ mark {
     flex: 1 1 100%;
   }
 }
+
+/* Dashboard chart added in M5 */
+
+.chart {
+  height: 190px;
+  border-bottom: none;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+
+.bar-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: 2px solid var(--black);
+}
+
+.bar {
+  width: 100%;
+  min-height: 2px;
+  background: var(--black);
+  border-radius: 3px 3px 0 0;
+  transform-origin: bottom;
+  animation: grow 0.4s ease-out;
+  transition: height 0.3s ease-out;
+}
+
+.bar-value,
+.bar-label {
+  font-size: 0.7rem;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.bar-value {
+  min-height: 1.2em;
+  font-weight: 600;
+}
+
+.bar-label {
+  color: var(--grey-dark);
+}
+
+@keyframes grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.cap-status.over::before {
+  content: "! ";
+}
+
+@media (min-width: 768px) {
+  .bar-value,
+  .bar-label {
+    font-size: 0.8rem;
+  }
+}

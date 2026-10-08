@@ -4,6 +4,20 @@ export const DEFAULT_TAGS = ['Assignment', 'Class', 'Exam', 'Club', 'Personal', 
 
 let tasks = [];
 let counter = 0;
+let settings = {
+  unit: 'minutes',
+  weeklyCap: 1200,
+  tags: [...DEFAULT_TAGS]
+};
+
+export function getSettings() {
+  return settings;
+}
+
+export function updateSettings(changes) {
+  settings = { ...settings, ...changes };
+  return settings;
+}
 
 function idNumber(id) {
   const m = /^task_(\d+)$/.exec(id);

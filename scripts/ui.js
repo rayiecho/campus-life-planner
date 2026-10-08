@@ -209,3 +209,72 @@ export function focusInTask(id, selector) {
     }
   }
 }
+
+// Dashboard
+
+export function renderStats(stats, unit) {
+  document.getElementById('stat-count').textContent = stats.count;
+  document.getElementById('stat-total').textContent = formatDuration(stats.total, unit);
+  document.getElementById('stat-week').textContent = formatDuration(stats.next7, unit);
+
+  const top = document.getElementById('stat-top-tag');
+  top.textContent = stats.top ? stats.top.tag : 'None';
+  top.nextElementSibling.textContent = stats.top
+    ? `Top tag (${stats.top.count} ${stats.top.count === 1 ? 'task' : 'tasks'})`
+    : 'Top tag';
+}
+
+export function renderChart(days, unit) {
+  const chart = document.getElementById('chart');
+  const max = Math.max(1, ...days.map(d => d.minutes));
+
+  chart.replaceChildren(...days.map(day => {
+    const col = el('div', 'bar-col');
+
+    const value = el('span', 'bar-value');
+    value.textContent = day.minutes ? formatDuration(day.minutes, unit) : '';
+
+    const track = el('div', 'bar-track');
+    const bar = el('div', 'bar');
+    bar.style.height = `${(day.minutes / max) * 100}%`;
+    track.append(bar);
+
+    const label = el('span', 'bar-label');
+    label.textContent = day.label;
+
+    col.append(value, track, label);
+    return col;
+  }));
+
+  // role="img" hides the bars from screen readers, so the label has to carry the data
+  const summary = days.map(d => `${d.label}: ${formatDuration(d.minutes, unit)}`).join(', ');
+  chart.setAttribute('aria-label', `Time due each day for the last 7 days. ${summary}.`);
+}
+
+let lastCapMessage = '';
+
+// polite when under the target, assertive when over, as the brief asks
+export function renderCap(status, used, cap, unit) {
+  const box = document.getElementById('cap-status');
+  let message;
+
+  if (!status) {
+    message = 'No weekly target set. You can add one in Settings.';
+  } else if (status.over) {
+    message = `Over your weekly target by ${formatDuration(status.amount, unit)}. ` +
+      `You have ${formatDuration(used, unit)} due in the next 7 days and your target is ${formatDuration(cap, unit)}.`;
+  } else if (status.amount === 0) {
+    message = `You're exactly at your weekly target of ${formatDuration(cap, unit)}.`;
+  } else {
+    message = `${formatDuration(status.amount, unit)} left of your ${formatDuration(cap, unit)} weekly target.`;
+  }
+
+  box.classList.toggle('over', Boolean(status && status.over));
+  box.setAttribute('aria-live', status && status.over ? 'assertive' : 'polite');
+
+  // only announce when the message actually changes
+  if (message !== lastCapMessage) {
+    lastCapMessage = message;
+    setStatus('cap-status', message);
+  }
+}

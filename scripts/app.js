@@ -1,7 +1,13 @@
-import { checkField, checkTask, collapseSpaces } from './validators.js';
-import { showError, clearErrors, setStatus, renderTasks, setSortIndicator, focusInTask } from './ui.js';
-import { getTasks, setTasks, addTask, updateTask, deleteTask, findTask, DEFAULT_TAGS } from './state.js';
+import { checkField, checkTask, checkCap, collapseSpaces } from './validators.js';
+import {
+  showError, clearErrors, setStatus, renderTasks, setSortIndicator, focusInTask,
+  renderStats, renderChart, renderCap
+} from './ui.js';
+import {
+  getTasks, setTasks, addTask, updateTask, deleteTask, findTask, getSettings, updateSettings
+} from './state.js';
 import { compileRegex, parseQuery, filterTasks, sortTasks } from './search.js';
+import { computeStats, capStatus } from './stats.js';
 
 const form = document.getElementById('task-form');
 const tasksSection = document.getElementById('tasks');
@@ -31,11 +37,25 @@ function refresh() {
   let emptyText = 'No tasks yet. Add your first one below.';
   if (all.length && !shown.length) emptyText = 'No tasks match that search.';
 
-  renderTasks({ list: shown, re, editingId, newId, unit: 'minutes', emptyText });
+  renderTasks({ list: shown, re, editingId, newId, unit: getSettings().unit, emptyText });
   setSortIndicator(sortSelect.value);
   newId = null;
 
   return { shown: shown.length, total: all.length, error };
+}
+
+// Search and sort only change the list. Adding, editing and deleting change the numbers too.
+function updateDashboard() {
+  const { unit, weeklyCap } = getSettings();
+  const stats = computeStats(getTasks());
+  renderStats(stats, unit);
+  renderChart(stats.days, unit);
+  renderCap(capStatus(stats.next7, weeklyCap), stats.next7, weeklyCap, unit);
+}
+
+function afterChange() {
+  refresh();
+  updateDashboard();
 }
 
 function runSearch() {
@@ -114,7 +134,7 @@ form.addEventListener('submit', e => {
   const task = addTask(data);
   newId = task.id;
   form.reset();
-  refresh();
+  afterChange();
   setStatus('form-status', `Added "${task.title}".`);
   titleInput.focus();
 });
@@ -145,7 +165,7 @@ function removeTask(id) {
   if (!confirm(`Delete "${task.title}"? This can't be undone.`)) return;
   deleteTask(id);
   if (editingId === id) editingId = null;
-  refresh();
+  afterChange();
   setStatus('search-status', `Deleted "${task.title}".`);
   searchInput.focus();
 }
@@ -191,7 +211,7 @@ tasksSection.addEventListener('submit', e => {
   const id = editForm.dataset.id;
   updateTask(id, data);
   editingId = null;
-  refresh();
+  afterChange();
   focusInTask(id, '[data-action="edit"]');
   setStatus('search-status', `Saved changes to "${data.title}".`);
 });
@@ -213,6 +233,27 @@ tasksSection.addEventListener('input', e => {
 
 tasksSection.addEventListener('keydown', e => {
   if (e.key === 'Escape' && editingId) cancelEdit();
+});
+
+// Settings: weekly target (the rest of Settings is added in M6)
+
+const settingsForm = document.getElementById('settings-form');
+const capInput = document.getElementById('weekly-cap');
+
+// pressing Enter in a settings field would otherwise reload the page
+settingsForm.addEventListener('submit', e => e.preventDefault());
+
+capInput.addEventListener('change', () => {
+  const value = capInput.value.trim();
+  const msg = checkCap(value);
+  showError(capInput, msg);
+  if (msg) return;
+  updateSettings({ weeklyCap: value === '' ? 0 : Number(value) });
+  updateDashboard();
+});
+
+capInput.addEventListener('input', () => {
+  if (capInput.hasAttribute('aria-invalid')) showError(capInput, checkCap(capInput.value.trim()));
 });
 
 // Start up
@@ -239,6 +280,7 @@ async function loadSeed() {
   }
 }
 
-fillTagList(DEFAULT_TAGS);
+fillTagList(getSettings().tags);
+capInput.value = getSettings().weeklyCap || '';
 await loadSeed();
-refresh();
+afterChange();
