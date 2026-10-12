@@ -253,7 +253,7 @@ export function renderChart(days, unit) {
 
 let lastCapMessage = '';
 
-// polite when under the target, assertive when over, as the brief asks
+// polite when under the target, assertive when over,
 export function renderCap(status, used, cap, unit) {
   const box = document.getElementById('cap-status');
   let message;
