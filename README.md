@@ -190,6 +190,10 @@ The CodeVibe reports are in `codevibe-reports/`.
   report file itself, which CodeVibe counted as an externally added file.
 - The reports also record external file changes to `app.js`, `ui.js`,
   `search.js`, `index.html`, `validators.js` and `tests.html` on 17–18 Oct 2026.
-  Which I used some google AI to search as I was not familiar with them, thanks for understanding.
+  I used AI tools for help with parts of these files because I was not yet
+  familiar with some of the techniques, and some of those changes were applied
+  to the files by the tools.
+
+I have reviewed every flagged file and can explain the code in each one.
 
 I have reviewed every flagged file and can explain the code in each one.
