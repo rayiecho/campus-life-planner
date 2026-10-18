@@ -8,7 +8,7 @@ Built with plain HTML, CSS and JavaScript (ES modules). No frameworks.
 
 **Live site:** https://rayiecho.github.io/campus-life-planner/
 
-**Demo video:** ADD-YOUR-UNLISTED-LINK-HERE
+**Demo video:** https://youtu.be/j4k_Qr5U11o
 
 ## Features
 
@@ -181,3 +181,15 @@ Import accepts this shape, or a plain list of tasks like `seed.json`. If any rec
 
 - GitHub: [rayiecho](https://github.com/rayiecho)
 - Email: r.ayiecho@alustudent.com
+
+## AI usage and CodeVibe
+
+The CodeVibe reports are in `codevibe-reports/`.
+
+- About 3,881 of the AI-classified lines in the final report are the exported
+  report file itself, which CodeVibe counted as an externally added file.
+- The reports also record external file changes to `app.js`, `ui.js`,
+  `search.js`, `index.html`, `validators.js` and `tests.html` on 17–18 Oct 2026.
+  Which I used some google AI to search as I was not familiar with them, thanks for understanding.
+
+I have reviewed every flagged file and can explain the code in each one.

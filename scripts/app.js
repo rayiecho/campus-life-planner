@@ -8,7 +8,7 @@ import {
   getSettings, updateSettings, resetSettings, getCounter, setCounter
 } from './state.js';
 import {
-  loadTasks, saveTasks, loadSettings, saveSettings, loadCounter, saveCounter,
+   loadTasks, saveTasks, loadSettings, saveSettings, loadCounter, saveCounter,
   buildExport, parseImport, validateTasks
 } from './storage.js';
 import { compileRegex, parseQuery, filterTasks, sortTasks } from './search.js';
@@ -45,8 +45,7 @@ function refresh() {
   renderTasks({ list: shown, re, editingId, newId, unit: getSettings().unit, emptyText });
   setSortIndicator(sortSelect.value);
   newId = null;
-
-  return { shown: shown.length, total: all.length, error };
+ return { shown: shown.length, total: all.length, error };
 }
 
 // Search and sort only change the list. Adding, editing and deleting change the numbers too.
@@ -63,7 +62,6 @@ function persist() {
   const ok = saveTasks(getTasks()) && saveCounter(getCounter());
   if (!ok) setStatus('data-status', "Couldn't save to this browser. Your changes will be lost when you close the page.");
 }
-
 function afterChange() {
   refresh();
   updateDashboard();
@@ -106,7 +104,7 @@ function readForm() {
 function validateInput(input) {
   const msg = checkField(fields[input.id], input.value);
   showError(input, msg);
-  return msg === '';
+  return msg ==='';
 }
 
 for (const id of Object.keys(fields)) {
@@ -432,7 +430,7 @@ async function loadSeed() {
 
 updateSettings(loadSettings());
 const saved = loadTasks();
-setTasks(saved === null ? await loadSeed() : saved);
+setTasks(saved ===null ? await loadSeed() : saved);
 setCounter(loadCounter());
 showSettings();
 afterChange();

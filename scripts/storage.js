@@ -122,7 +122,7 @@ export function buildExport(tasks, settings) {
 }
 
 // Takes the text of a file. Accepts our export format, or a plain list like seed.json.
-// The whole import is rejected if any record is bad, so nothing half-loads.
+// The wholw import is rejected if any record is bad, so nothing half-loads.
 export function parseImport(text) {
   let data;
   try {

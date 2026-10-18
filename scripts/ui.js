@@ -1,4 +1,4 @@
-// Everything that draws on the page: errors, status messages, the task table and cards.
+//Everything that draws on the page: errors, status messages, the task table and cards.
 
 import { highlight } from './search.js';
 
@@ -21,7 +21,7 @@ export function clearErrors(form) {
 // Emptying first makes screen readers repeat the message even if the text is the same
 export function setStatus(id, message) {
   const el = document.getElementById(id);
-  el.textContent = '';
+  el.textContent = ''
   setTimeout(() => (el.textContent = message), 50);
 }
 
@@ -191,7 +191,7 @@ export function renderTasks({ list, re, editingId, newId, unit, emptyText }) {
 
 // Tells screen readers which column the table is sorted by
 export function setSortIndicator(key) {
-  const [field, dir] = key.split('-');
+  const [fields, dir] = key.split('-');
   const columns = { title: 0, date: 1, duration: 2 };
   const headers = document.querySelectorAll('.task-table th');
   headers.forEach(th => th.removeAttribute('aria-sort'));
@@ -248,12 +248,12 @@ export function renderChart(days, unit) {
 
   // role="img" hides the bars from screen readers, so the label has to carry the data
   const summary = days.map(d => `${d.label}: ${formatDuration(d.minutes, unit)}`).join(', ');
-  chart.setAttribute('aria-label', `Time due each day for the last 7 days. ${summary}.`);
+  chart.setAttribute('aria-label', `Time due each day for the last seven days ${summary}.`);
 }
 
 let lastCapMessage = '';
 
-// polite when under the target, assertive when over,
+// polite when under the target, assertive when over
 export function renderCap(status, used, cap, unit) {
   const box = document.getElementById('cap-status');
   let message;
@@ -264,7 +264,7 @@ export function renderCap(status, used, cap, unit) {
     message = `Over your weekly target by ${formatDuration(status.amount, unit)}. ` +
       `You have ${formatDuration(used, unit)} due in the next 7 days and your target is ${formatDuration(cap, unit)}.`;
   } else if (status.amount === 0) {
-    message = `You're exactly at your weekly target of ${formatDuration(cap, unit)}.`;
+    message = `You're exactly your weekly target of ${formatDuration(cap, unit)}.`;
   } else {
     message = `${formatDuration(status.amount, unit)} left of your ${formatDuration(cap, unit)} weekly target.`;
   }
@@ -279,7 +279,7 @@ export function renderCap(status, used, cap, unit) {
   }
 }
 
-// Settings
+// settings
 
 export function renderTagChips(tags) {
   const list = document.getElementById('tag-chips');

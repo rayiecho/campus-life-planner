@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang = "en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Campus Life Planner</title>
+  <title>Campus life planner</title>
   <meta name="description" content="Plan tasks and events, track time, and search with regex.">
   <link rel="stylesheet" href="styles/main.css">
 </head>
@@ -12,7 +12,7 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <h1 class="logo">Campus Planner</h1>
+      <h1 class="logo">Campus planner</h1>
       <nav aria-label="Main">
         <ul class="nav-list">
           <li><a href="#dashboard">Dashboard</a></li>
@@ -116,25 +116,25 @@
 
         <div class="field">
           <label for="title">Title</label>
-          <input type="text" id="title" name="title" required aria-describedby="title-error">
+          <input type="text" id="title" name="title" required>
           <p class="error" id="title-error"></p>
         </div>
 
         <div class="field">
           <label for="due-date">Due date</label>
-          <input type="date" id="due-date" name="dueDate" required aria-describedby="due-date-error">
+          <input type="date" id="due-date" name="dueDate" required>
           <p class="error" id="due-date-error"></p>
         </div>
 
         <div class="field">
           <label for="duration">Duration (minutes)</label>
-          <input type="text" id="duration" name="duration" inputmode="decimal" required aria-describedby="duration-error">
+          <input type="text" id="duration" name="duration" inputmode="decimal" required>
           <p class="error" id="duration-error"></p>
         </div>
 
         <div class="field">
           <label for="tag">Tag</label>
-          <input type="text" id="tag" name="tag" list="tag-list" required aria-describedby="tag-error">
+          <input type="text" id="tag" name="tag" list="tag-list" required>
           <datalist id="tag-list"></datalist>
           <p class="error" id="tag-error"></p>
         </div>
@@ -166,7 +166,7 @@
 
         <div class="field">
           <label for="weekly-cap">Weekly target (minutes)</label>
-          <input type="text" id="weekly-cap" inputmode="decimal" aria-describedby="weekly-cap-error">
+          <input type="text" id="weekly-cap" inputmode="decimal">
           <p class="error" id="weekly-cap-error"></p>
         </div>
 
@@ -206,7 +206,7 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p>Campus Planner. Built with HTML, CSS and JavaScript.</p>
+      <p>Campus Planner, Built with HTML, CSS and JavaScript.</p>
     </div>
   </footer>
   <script type="module" src="scripts/app.js"></script>

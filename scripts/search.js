@@ -2,9 +2,12 @@
 
 // Bad patterns like "(abc" return an error message instead of crashing the page
 export function compileRegex(input, ignoreCase = true) {
-  if (!input) return { re: null, error: '' };
+  if (!input) {
+    return { re: null, error: '' };
+  }
   try {
-    return { re: new RegExp(input, ignoreCase ? 'gi' : 'g'), error: '' };
+    const flags = ignoreCase ? 'gi' : 'g';
+    return { re: new RegExp(input, flags), error: '' };
   } catch (err) {
     return { re: null, error: err.message };
   }
@@ -12,10 +15,16 @@ export function compileRegex(input, ignoreCase = true) {
 
 // "@tag:Exam" filters by tag. Anything typed after it is searched as a normal pattern.
 export function parseQuery(raw) {
-  const m = raw.match(/^@tag:(\w+)\s*(.*)$/);
-  if (m) return { tag: m[1], pattern: m[2] };
+  if (!raw) {
+    return { tag: '', pattern: '' };
+  }
+  const match = raw.match(/^@tag:([^\s]+)\s*(.*)$/);
+  if (match) {
+    return { tag: match, pattern: match };
+  }
   return { tag: '', pattern: raw };
 }
+
 
 // The regex has the g flag, so lastIndex has to be reset or test() skips matches
 function matches(re, text) {
@@ -63,7 +72,7 @@ export function highlight(text, re) {
 export function sortTasks(list, key) {
   const [field, dir] = key.split('-');
   const sign = dir === 'desc' ? -1 : 1;
-
+  
   return [...list].sort((a, b) => {
     let diff;
     if (field === 'duration') diff = a.duration - b.duration;

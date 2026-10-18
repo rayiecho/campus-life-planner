@@ -35,7 +35,7 @@
 
     function group(name) {
       const h = document.createElement('h2');
-      h.textContent = name;
+      h.textcontent = name;
       list = document.createElement('ul');
       results.append(h, list);
     }
@@ -91,7 +91,7 @@
     assert('"Two  spaces" is rejected', !ok(checkTag('Two  spaces')));
     assert('"-Club" is rejected (starts with hyphen)', !ok(checkTag('-Club')));
 
-    group('Whole task');
+    group('Whole task`');
     const good = { title: 'Physics exam', dueDate: '2026-10-20', duration: '120', tag: 'Exam' };
     const bad = { title: ' x', dueDate: '2026-02-30', duration: '01', tag: 'Exam1' };
     assert('valid task has no errors', Object.keys(checkTask(good)).length === 0);
